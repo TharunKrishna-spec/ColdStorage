@@ -1,0 +1,31 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "cold_storage_system": {
+      "$unitId": {
+        "latest": {
+          ".validate": "newData.hasChildren(['temperature','humidity','gas_level','freshness_score','risk_status','timestamp'])"
+        },
+        "history": {
+          "$historyId": {
+            ".validate": "newData.hasChildren(['temperature','humidity','gas_level','freshness_score','risk_status','timestamp'])"
+          }
+        }
+      }
+    },
+    "alerts": {
+      "$alertId": {
+        ".validate": "newData.hasChildren(['storage_unit','message','severity','timestamp'])"
+      }
+    },
+    "user_tokens": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$token": {
+          ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    }
+  }
+}

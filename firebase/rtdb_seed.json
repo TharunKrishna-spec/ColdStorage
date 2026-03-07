@@ -1,0 +1,70 @@
+{
+  "cold_storage_system": {
+    "storage_unit_01": {
+      "latest": {
+        "temperature": 3.2,
+        "humidity": 72.5,
+        "gas_level": 240,
+        "freshness_score": 82,
+        "risk_status": "Safe",
+        "timestamp": 1762500000
+      },
+      "history": {
+        "h1": {
+          "temperature": 3.6,
+          "humidity": 70.2,
+          "gas_level": 228,
+          "freshness_score": 86,
+          "risk_status": "Safe",
+          "timestamp": 1762499100
+        },
+        "h2": {
+          "temperature": 3.4,
+          "humidity": 71.2,
+          "gas_level": 233,
+          "freshness_score": 84,
+          "risk_status": "Safe",
+          "timestamp": 1762499700
+        },
+        "h3": {
+          "temperature": 3.2,
+          "humidity": 72.5,
+          "gas_level": 240,
+          "freshness_score": 82,
+          "risk_status": "Safe",
+          "timestamp": 1762500000
+        }
+      }
+    },
+    "storage_unit_02": {
+      "latest": {
+        "temperature": 5.8,
+        "humidity": 79.1,
+        "gas_level": 318,
+        "freshness_score": 64,
+        "risk_status": "Warning",
+        "timestamp": 1762500000
+      },
+      "history": {}
+    },
+    "storage_unit_03": {
+      "latest": {
+        "temperature": 7.9,
+        "humidity": 84.6,
+        "gas_level": 468,
+        "freshness_score": 35,
+        "risk_status": "Critical",
+        "timestamp": 1762500000
+      },
+      "history": {}
+    }
+  },
+  "alerts": {
+    "seed_alert_01": {
+      "storage_unit": "storage_unit_03",
+      "message": "Gas trend increasing quickly. Possible early spoilage.",
+      "severity": "critical",
+      "timestamp": 1762500000
+    }
+  }
+}
