@@ -9,7 +9,7 @@ plugins {
 android {
     namespace = "foodttracker.cold_storage_monitor"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "foodttracker.in"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

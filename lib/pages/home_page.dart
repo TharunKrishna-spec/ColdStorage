@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/cold_storage_service.dart';
 import '../services/notification_service.dart';
+import '../theme/app_theme.dart';
 import 'tabs/alerts_tab.dart';
 import 'tabs/dashboard_tab.dart';
 import 'tabs/history_tab.dart';
@@ -36,8 +37,43 @@ class _HomePageState extends State<HomePage> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cold Storage Monitoring'),
+        toolbarHeight: 78,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cold Storage Monitoring',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            Text(
+              'Unit focus: $_selectedUnit',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.ink.withValues(alpha: 0.65),
+                  ),
+            ),
+          ],
+        ),
         actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.cloud_done, size: 18, color: AppTheme.safe),
+                SizedBox(width: 8),
+                Text(
+                  'Realtime',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ),
           IconButton(
             tooltip: 'Sign out',
             onPressed: () => AuthService.instance.signOut(),
@@ -45,7 +81,19 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: pages[_index],
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF5F0E6), Color(0xFFEAF3F1)],
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: pages[_index],
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),

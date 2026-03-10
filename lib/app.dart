@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'pages/auth_page.dart';
 import 'pages/home_page.dart';
 import 'services/auth_service.dart';
+import 'theme/app_theme.dart';
 
 class ColdStorageApp extends StatelessWidget {
   const ColdStorageApp({super.key});
@@ -13,10 +14,7 @@ class ColdStorageApp extends StatelessWidget {
     return MaterialApp(
       title: 'Cold Storage Monitor',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF006A6A)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       home: StreamBuilder<User?>(
         stream: AuthService.instance.authStateChanges(),
         builder: (context, snapshot) {
