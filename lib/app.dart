@@ -6,6 +6,8 @@ import 'pages/home_page.dart';
 import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
 
+const bool kDemoBypassAuth = false;
+
 class ColdStorageApp extends StatelessWidget {
   const ColdStorageApp({super.key});
 
@@ -23,7 +25,7 @@ class ColdStorageApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           }
-          if (snapshot.data == null) {
+          if (!kDemoBypassAuth && snapshot.data == null) {
             return const AuthPage();
           }
           return const HomePage();

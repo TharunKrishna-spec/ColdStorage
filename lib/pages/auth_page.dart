@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
@@ -46,6 +47,10 @@ class _AuthPageState extends State<AuthPage> {
           password: _passwordController.text.trim(),
         );
       }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _error = _friendlyAuthMessage(e);
+      });
     } catch (e) {
       setState(() {
         _error = e.toString().replaceAll('Exception: ', '');
@@ -56,6 +61,29 @@ class _AuthPageState extends State<AuthPage> {
           _busy = false;
         });
       }
+    }
+  }
+
+  String _friendlyAuthMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'invalid-email':
+        return 'Invalid email or password.';
+      case 'user-not-found':
+        return 'Account not found. Use Sign up to create one.';
+      case 'email-already-in-use':
+        return 'This email already exists. Try Sign in instead.';
+      case 'weak-password':
+        return 'Password is too weak. Use at least 6 characters.';
+      case 'network-request-failed':
+        return 'Network error. Check internet connection on the phone.';
+      case 'operation-not-allowed':
+        return 'Email/Password sign-in is disabled in Firebase Console.';
+      case 'too-many-requests':
+        return 'Too many attempts. Wait a bit and try again.';
+      default:
+        return e.message ?? e.code;
     }
   }
 
@@ -78,131 +106,172 @@ class _AuthPageState extends State<AuthPage> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final compact = constraints.maxWidth < 760;
-                  return Flex(
-                    direction: compact ? Axis.vertical : Axis.horizontal,
+                  final intro = Padding(
+                    padding: EdgeInsets.only(
+                      right: compact ? 0 : 20,
+                      bottom: compact ? 20 : 0,
+                    ),
+                    child: _IntroPanel(compact: compact),
+                  );
+                  final formCard = _AuthFormCard(
+                    formKey: _formKey,
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                    isLogin: _isLogin,
+                    busy: _busy,
+                    error: _error,
+                    onSubmit: _submit,
+                    onToggleMode: () {
+                      setState(() {
+                        _isLogin = !_isLogin;
+                      });
+                    },
+                  );
+
+                  if (compact) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        intro,
+                        formCard,
+                      ],
+                    );
+                  }
+
+                  return Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        flex: compact ? 0 : 5,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            right: compact ? 0 : 20,
-                            bottom: compact ? 20 : 0,
-                          ),
-                          child: _IntroPanel(compact: compact),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _isLogin ? 'Operator Access' : 'Create Account',
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _isLogin
-                                        ? 'Sign in to monitor live cold storage conditions.'
-                                        : 'Create credentials for storage monitoring access.',
-                                    style: TextStyle(
-                                      color: AppTheme.ink.withValues(alpha: 0.7),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  TextFormField(
-                                    controller: _emailController,
-                                    decoration: const InputDecoration(labelText: 'Email'),
-                                    validator: (value) {
-                                      if (value == null || !value.contains('@')) {
-                                        return 'Enter a valid email';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 14),
-                                  TextFormField(
-                                    controller: _passwordController,
-                                    obscureText: true,
-                                    decoration: const InputDecoration(labelText: 'Password'),
-                                    validator: (value) {
-                                      if (value == null || value.length < 6) {
-                                        return 'Password must be at least 6 characters';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  if (_error != null) ...[
-                                    const SizedBox(height: 14),
-                                    Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.all(14),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFFFEFEA),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Text(
-                                        _error!,
-                                        style: const TextStyle(color: AppTheme.critical),
-                                      ),
-                                    ),
-                                  ],
-                                  const SizedBox(height: 18),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      onPressed: _busy ? null : _submit,
-                                      child: _busy
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: Colors.white,
-                                              ),
-                                            )
-                                          : Text(_isLogin ? 'Sign In' : 'Create Account'),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: TextButton(
-                                      onPressed: _busy
-                                          ? null
-                                          : () {
-                                              setState(() {
-                                                _isLogin = !_isLogin;
-                                              });
-                                            },
-                                      child: Text(
-                                        _isLogin
-                                            ? 'Need an account? Sign up'
-                                            : 'Already have an account? Sign in',
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      Expanded(flex: 5, child: intro),
+                      Expanded(flex: 4, child: formCard),
                     ],
                   );
                 },
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthFormCard extends StatelessWidget {
+  const _AuthFormCard({
+    required this.formKey,
+    required this.emailController,
+    required this.passwordController,
+    required this.isLogin,
+    required this.busy,
+    required this.error,
+    required this.onSubmit,
+    required this.onToggleMode,
+  });
+
+  final GlobalKey<FormState> formKey;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool isLogin;
+  final bool busy;
+  final String? error;
+  final Future<void> Function() onSubmit;
+  final VoidCallback onToggleMode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isLogin ? 'Operator Access' : 'Create Account',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isLogin
+                    ? 'Sign in to monitor live cold storage conditions.'
+                    : 'Create credentials for storage monitoring access.',
+                style: TextStyle(
+                  color: AppTheme.ink.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || !value.contains('@')) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 14),
+              TextFormField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Password'),
+                validator: (value) {
+                  if (value == null || value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              if (error != null) ...[
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEFEA),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    error!,
+                    style: const TextStyle(color: AppTheme.critical),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: busy ? null : onSubmit,
+                  child: busy
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(isLogin ? 'Sign In' : 'Create Account'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: busy ? null : onToggleMode,
+                  child: Text(
+                    isLogin
+                        ? 'Need an account? Sign up'
+                        : 'Already have an account? Sign in',
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -229,7 +298,8 @@ class _IntroPanel extends StatelessWidget {
       padding: const EdgeInsets.all(28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
