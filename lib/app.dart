@@ -25,6 +25,9 @@ class ColdStorageApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           }
+          if (snapshot.hasError) {
+            return const AuthPage();
+          }
           if (!kDemoBypassAuth && snapshot.data == null) {
             return const AuthPage();
           }

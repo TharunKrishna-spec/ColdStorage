@@ -139,12 +139,14 @@ class _AuthPageState extends State<AuthPage> {
                     );
                   }
 
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(flex: 5, child: intro),
-                      Expanded(flex: 4, child: formCard),
-                    ],
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(flex: 5, child: intro),
+                        Expanded(flex: 4, child: formCard),
+                      ],
+                    ),
                   );
                 },
               ),
